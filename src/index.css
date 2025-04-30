@@ -1,0 +1,117 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 20 33% 98%;
+    --foreground: 24 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 24 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 10% 10%;
+
+    --primary: 15 56% 32%;
+    --primary-foreground: 20 33% 98%;
+
+    --secondary: 21 76% 64%;
+    --secondary-foreground: 24 10% 10%;
+
+    --muted: 25 25% 95%;
+    --muted-foreground: 24 5% 50%;
+
+    --accent: 25 33% 85%;
+    --accent-foreground: 24 10% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 20 33% 98%;
+
+    --border: 21 15% 90%;
+    --input: 21 15% 90%;
+    --ring: 15 56% 32%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 20 33% 98%;
+    --sidebar-foreground: 24 10% 10%;
+    --sidebar-primary: 15 56% 32%;
+    --sidebar-primary-foreground: 20 33% 98%;
+    --sidebar-accent: 21 76% 64%;
+    --sidebar-accent-foreground: 24 10% 10%;
+    --sidebar-border: 21 15% 90%;
+    --sidebar-ring: 15 56% 32%;
+  }
+
+  .dark {
+    --background: 24 20% 10%;
+    --foreground: 20 33% 98%;
+
+    --card: 24 20% 10%;
+    --card-foreground: 20 33% 98%;
+
+    --popover: 24 20% 10%;
+    --popover-foreground: 20 33% 98%;
+
+    --primary: 20 33% 98%;
+    --primary-foreground: 24 20% 10%;
+
+    --secondary: 15 40% 35%;
+    --secondary-foreground: 20 33% 98%;
+
+    --muted: 15 25% 20%;
+    --muted-foreground: 20 20% 70%;
+
+    --accent: 15 25% 20%;
+    --accent-foreground: 20 33% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 20 33% 98%;
+
+    --border: 15 25% 20%;
+    --input: 15 25% 20%;
+    --ring: 24 5% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-inter;
+  }
+  
+  .property-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .property-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(124, 54, 38, 0.15), 0 8px 10px -6px rgba(124, 54, 38, 0.1);
+  }
+  
+  .gradient-hero {
+    background: linear-gradient(to right, rgba(124, 54, 38, 0.9), rgba(232, 148, 95, 0.8)), url('/hero-background.jpg');
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* Added styles for improved visual appeal */
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .hover-grow {
+    transition: transform 0.3s ease;
+  }
+  
+  .hover-grow:hover {
+    transform: scale(1.03);
+  }
+}
