@@ -1,8 +1,9 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, LogOut, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { WalletContext } from "@/contexts/WalletContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ declare global {
 }
 
 const Navbar = () => {
+  const {bindWallet} = useContext(WalletContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [account, setAccount] = useState<string | null>(null);
@@ -43,6 +45,8 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    setAccount(null);
+    localStorage.removeItem('walletAddress');
     setIsLoggedIn(false);
     navigate("/");
   };
@@ -60,6 +64,14 @@ const Navbar = () => {
     try {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const address = accounts[0];
+      const message = `Sign to link your wallet: ${address}`;
+      const signature = await window.ethereum.request({
+        method:'personal_sign',
+        params:[message,address],
+      })
+
+      // Backend interaction using a fetch API
+      await bindWallet(address,signature);
       setAccount(address);
       localStorage.setItem("walletAddress", address);
       

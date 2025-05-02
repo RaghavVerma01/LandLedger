@@ -21,36 +21,36 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 
 const Properties = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 100]);
+  const [priceRange, setPriceRange] = useState([0, 200]);
   const [bedroomsFilter, setBedroomsFilter] = useState<string>("any");
   const [bathroomsFilter, setBathroomsFilter] = useState<string>("any");
   const [statusFilter, setStatusFilter] = useState<string>("any");
   const [showFilters, setShowFilters] = useState(false);
 
-  const {properties,loading,error} = usePropertyContext();
-  console.log(properties);
+  const { properties, loading, error, deleteProperty } = usePropertyContext();
+  console.log("All listed properties");
+  console.log("Properties: ",properties);
 
   // Filter properties based on search and filter criteria
   const filteredProperties = properties.filter((property) => {
     const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          property.location.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    
+      property.location.toLowerCase().includes(searchQuery.toLowerCase());
+
+
     const matchesPrice = property.price >= priceRange[0] && property.price <= priceRange[1];
-    
-    const matchesBedrooms = bedroomsFilter === "any" || 
-                            (bedroomsFilter === "4+" && property.bedrooms >= 4) ||
-                            (property.bedrooms.toString() === bedroomsFilter);
-    
-    const matchesBathrooms = bathroomsFilter === "any" || 
-                             (bathroomsFilter === "4+" && property.bathrooms >= 4) ||
-                             (property.bathrooms.toString() === bathroomsFilter);
-    
+
+    const matchesBedrooms = bedroomsFilter === "any" ||
+      (bedroomsFilter === "4+" && property.bedrooms >= 4) ||
+      (property.bedrooms.toString() === bedroomsFilter);
+
+    const matchesBathrooms = bathroomsFilter === "any" ||
+      (bathroomsFilter === "4+" && property.bathrooms >= 4) ||
+      (property.bathrooms.toString() === bathroomsFilter);
+
     const matchesStatus = statusFilter === "any" || property.status === statusFilter;
-    
     return matchesSearch && matchesPrice && matchesBedrooms && matchesBathrooms && matchesStatus;
   });
-
+  console.log('filteredproperties: ',filteredProperties)
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -187,7 +187,7 @@ const Properties = () => {
               filteredProperties.map((property) => (
                 <PropertyCard
                   // key={property.id}
-                  // id={property.id}
+                  id={property._id}
                   title={property.title}
                   location={property.location}
                   price={property.price}

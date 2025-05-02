@@ -127,16 +127,12 @@ const SellProperty = () => {
       const signerAddress = await signer.getAddress();
       const tokenURI = `https://landledger-metadata.com/dummy/${Date.now()}`
       console.log(signerAddress)
-      await submitProperty({
-        ...formData,
-        features: features,
-        imageUrl: imageUrl,
-      });
+
       const tx = await propertyContract.createProperty(
         signerAddress,
         tokenURI, // tokenURI
         formData.location,
-        formData.price,
+        ethers.parseEther(formData.price.toString()),
         formData.squareFootage,
         formData.bedrooms,
         formData.bathrooms,
@@ -171,6 +167,11 @@ const SellProperty = () => {
       });
       const propertyDetails = await fetchPropertyFromChain(tokenId);
       console.log("Fetched Property Details: ", propertyDetails);
+      await submitProperty({
+        ...formData,
+        features: features,
+        imageUrl: imageUrl,
+      });
       
       toast({
         title: "Property Listed",

@@ -17,12 +17,12 @@ const Index = () => {
     {
       name: "Sophie Anderson",
       role: "Homeowner",
-      content: "BlockHome Vista made selling my property so easy. The blockchain verification gave buyers confidence and I received multiple offers within days!",
+      content: "LandLedger made selling my property so easy. The blockchain verification gave buyers confidence and I received multiple offers within days!",
     },
     {
       name: "Michael Johnson",
       role: "Real Estate Investor",
-      content: "As someone who invests in properties regularly, the transparency BlockHome Vista provides is invaluable. No more worrying about hidden issues or title problems.",
+      content: "As someone who invests in properties regularly, the transparency LandLedger provides is invaluable. No more worrying about hidden issues or title problems.",
     },
     {
       name: "Emma Williams",
@@ -170,7 +170,7 @@ const Index = () => {
         <section className="py-16 bg-gradient-to-b from-white to-estate-tertiary/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-estate-dark mb-4">Why Choose BlockHome Vista</h2>
+              <h2 className="text-3xl font-bold text-estate-dark mb-4">Why Choose LandLedger</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
                 Our blockchain-powered platform brings transparency, security, and efficiency to real estate transactions.
               </p>

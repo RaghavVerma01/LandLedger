@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema({
         required:[true,'Please add a Password'],
         
     },
+    walletAddress:{
+        type:String,
+        default:null,
+        lowercase:true,
+        unique:true
+    },
     date:{
         type:Date,
         default: Date.now
@@ -25,4 +31,4 @@ const userSchema = new mongoose.Schema({
 
 
 
-module.exports = mongoose.model('user',userSchema)
+module.exports = mongoose.model('User',userSchema)

@@ -1,9 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-interface Property {
-  title:string;
-  description:string;
+export interface Seller{
+  name:string;
+  username:string;
+}
+export interface Property {
+  _id:string
+  title: string;
+  description: string;
   location: string;
   price: number;
   status: any;
@@ -12,16 +17,17 @@ interface Property {
   bathrooms: number;
   yearBuilt: number;
   blockchainId: string;
-  features?:string[];
+  features?: string[];
   imageUrl: string[];
+  seller: Seller|null;
 }
 
 interface PropertyContextType {
   submitProperty: (formData: Omit<Property, "blockchainId">) => Promise<void>;
-  fetchProperties:()=> Promise<void>;
+  fetchProperties: () => Promise<void>;
+  deleteProperty: (id: string) => Promise<void>;  // ✅ added
   properties: Property[];
-  error;
-  
+  error: string | null;
   loading: boolean;
 }
 
@@ -43,15 +49,15 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const res = await fetch("http://localhost:5000/api/property/addProperty", {
         method: "POST",
         headers: {
-          "auth-token":localStorage.getItem("token"),
+          "auth-token": localStorage.getItem("token"),
           "Content-Type": "application/json",
         },
         body: JSON.stringify(propertyWithId),
       });
       const data = await res.json();
       if (!res.ok) {
-        console.log("Server error: ",data);
-        console.log("Auth token is: ",localStorage.getItem("token"))
+        console.log("Server error: ", data);
+        console.log("Auth token is: ", localStorage.getItem("token"))
         throw new Error("Failed to submit property");
       }
 
@@ -69,7 +75,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const res = await fetch("http://localhost:5000/api/property/fetchProperty", {
         headers: {
           "Content-Type": "application/json",
-          "auth-token":localStorage.getItem('token')
+          "auth-token": localStorage.getItem('token')
         },
       });
 
@@ -85,12 +91,35 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchProperties();
-  },[]);
+  }, []);
 
+  const deleteProperty = async (id: string) => {
+    try {
+      setLoading(true);
+  
+      const res = await fetch(`http://localhost:5000/api/property/delete/${id}`, {
+        method: "DELETE",
+        headers: {
+          "auth-token": localStorage.getItem("token") || "",
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!res.ok) throw new Error("Failed to delete property");
+  
+      setProperties(prev => prev.filter(p => p._id !== id));
+      console.log(`Property with id: ${id} deleted`);
+    } catch (error) {
+      console.error(`Error deleting property with id: ${id}`, error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   return (
-    <PropertyContext.Provider value={{ submitProperty,fetchProperties,loading,properties,error }}>
+    <PropertyContext.Provider value={{submitProperty, fetchProperties, deleteProperty, loading, properties, error }}>
       {children}
     </PropertyContext.Provider>
   );

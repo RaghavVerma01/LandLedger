@@ -4,11 +4,13 @@ import { ethers } from "ethers";
 interface WalletContextType {
     currentAccount: string | null;
     connectWallet: () => Promise<void>;
+    bindWallet:(address,signature)=>Promise<void>;
 }
 
-const WalletContext = createContext<WalletContextType>({
+export const WalletContext = createContext<WalletContextType>({
     currentAccount: null,
     connectWallet: async () => { },
+    bindWallet:async()=>{},
 });
 
 export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -38,8 +40,22 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             checkConnection();
         },[]);
 
+    const bindWallet = async (address,signature )=>{
+        await fetch('http://localhost:5000/api/auth/bind-wallet',{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json',
+                'auth-token':localStorage.getItem('token'),
+            },
+            body:JSON.stringify({
+                walletAddress:address,
+                signature:signature,
+            })
+
+        })
+    }
         return(
-            <WalletContext.Provider value = {{currentAccount,connectWallet}}>
+            <WalletContext.Provider value = {{bindWallet,currentAccount,connectWallet}}>
                 {children}
             </WalletContext.Provider>
         );

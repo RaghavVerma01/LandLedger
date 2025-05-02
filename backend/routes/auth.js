@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const router = express.Router()
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const ethers = require('ethers')
 
 dotenv.config(); // Load environment variables
 
@@ -99,6 +100,23 @@ router.post('/getuser', fetchuser, async (req, res) => {
    }
 });
 
+// ROUTE 4: Binding User Wallet securely
+router.post('/bind-wallet',fetchuser,async(req,res)=>{
+   const {walletAddress,signature} = req.body;
+   const userId = req.user.id; //From JWT middleware
 
+   const message = `Sign to link your wallet: ${walletAddress}`;
+
+   const recoveredAddress = ethers.verifyMessage(message,signature);
+
+   if(recoveredAddress.toLowerCase()!==walletAddress.toLowerCase()){
+      return res.status(401).json({message:"Signature verification failed"});
+   }
+
+   //Save to database
+   await User.findByIdAndUpdate(userId,{walletAddress});
+   
+   res.json({message:"Wallet bound successfully"})
+})
 module.exports = router
 

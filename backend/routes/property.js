@@ -2,15 +2,33 @@ const express = require('express');
 const router = express.Router();
 const fetchuser = require('../middleware/fetchuser');
 const Property = require('../models/Property');
+const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
 
 
 router.get('/fetchProperty', fetchuser, async (req, res) => {
   try {
-    const property = await Property.find();
-    res.json(property);
+    const property = await Property.find()
+    .populate('userId', 'name username').lean()
+
+    const properties = property.map((p)=>{
+      const{userId,...rest} = p
+      return {
+        ...rest,
+        seller:userId
+      }
+    })
+
+    // const formattedProperties = properties.map((property)=>{
+    //   const{userId, ...rest} = property;
+    //     return {
+    //       ...rest,
+    //       seller:userId,
+    //     }
+    // })
+    res.json(properties);
   } catch (error) {
-    console.error(error.message);
+    console.log(error);
     res.status(500).send("Internal Server Error");
   }
 });
@@ -53,8 +71,8 @@ router.post(
         } = req.body;
   
         const newProperty = new Property({
-        //   userId: req.user.id,
-         userId: '661e9d68bc2f8a28ec6a1c2b',
+          userId: req.user.id,
+        //  userId: '661e9d68bc2f8a28ec6a1c2b',
           title,
           description,
           location,
@@ -118,65 +136,26 @@ router.post(
       res.status(500).json({ message: "Server error." });
     }
   });
+
+  router.delete('/delete/:id', fetchuser, async (req, res) => {
+    try {
+      const propertyId = req.params.id;
   
+      // Optional: restrict deletion only to properties owned by the user
+      // const property = await Property.findOneAndDelete({ _id: propertyId, userId: req.user.id });
   
+      const property = await Property.findByIdAndDelete(propertyId);
+  
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+  
+      res.json({ message: "Property deleted successfully", deletedProperty: property });
+    } catch (error) {
+      console.error("❌ Error deleting property:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+   
 module.exports = router;
-
-
-
-
-
-
-
-
-
-// const express = require('express')
-// const router = express.Router();
-// // import Property from '../models/Property';
-// // const User = require('../models/User');
-// const fetchuser = require('../middleware/fetchuser');
-// const Property = require('../models/Property');
-
-
-
-
-// router.post('/properties',fetchuser,async(req,res)=>{
-//     try{
-//         const{
-//             title,
-//             description,
-//             location,
-//             price,
-//             squareFootage,
-//             bedrooms,   
-//             bathrooms,
-//             yearBuilt,
-//             status,
-//             features,
-//             imageUrls,
-//         } = req.body;
-
-//         const newProperty = new Property({
-//             userId: req.user.id,
-//             title,
-//             description,
-//             location,
-//             price,
-//             squareFootage,
-//             bedrooms,
-//             bathrooms,
-//             yearBuilt,
-//             status,
-//             features,
-//             imageUrls,
-//         });
-
-//         await newProperty.save();
-//         res.status(201).json(newProperty);
-//     }catch(err){
-//         console.error(err);
-//         res.status(500).json({error:"Failed to create property"});
-//     }
-// });
-
-// module.exports = router;

@@ -67,4 +67,5 @@ export const getUser = async (): Promise<any> => {
 // ✅ Fix: Ensure logout function exists
 export const logout = (): void => {
     localStorage.removeItem("token");
+    
 };

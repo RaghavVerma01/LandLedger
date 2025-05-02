@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Property, mockProperties } from "@/models/property";
+import { Property } from "@/contexts/propertyContext";
+// import { Property, mockProperties } from "@/models/property";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { buyProperty } from "@/utils/buyProperty";
@@ -29,28 +30,41 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { usePropertyContext } from "@/contexts/propertyContext";
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-
+  const { properties } = usePropertyContext();
+  // const fetchedProperties = async()=>{
+  //   await properties;
+  //   return properties;
+  // }
+  // console.log("properties: ",properties);
+  // console.log("id: ",id);
+  // console.log("property: ", property.seller);
   useEffect(() => {
     // Simulate API call to fetch property details
     const fetchProperty = () => {
       setLoading(true);
-      setTimeout(() => {
-        const foundProperty = mockProperties.find(
-          (p) => p.id === parseInt(id || "0")
-        );
-        setProperty(foundProperty || null);
+      if (!id) {
+        console.error("❌ No property ID found in route params");
+        return;
+      }
+      if (id && properties.length > 0) {
+        const found = properties.find((p) => p._id === id);
+        setProperty(found || null);
+        console.log("found: ", found);
         setLoading(false);
-      }, 500);
+      } else {
+        setLoading(false);
+      }
     };
 
     fetchProperty();
-  }, [id]);
+  }, [id, properties]);
 
   const handleContactSeller = () => {
     // In a real app, this would open a contact form or messaging feature
@@ -60,7 +74,7 @@ const PropertyDetail = () => {
     });
   };
 
-  const handleBuy = async()=>{
+  const handleBuy = async () => {
     return 0;
   }
   const handlePurchase = () => {
@@ -138,31 +152,31 @@ const PropertyDetail = () => {
             </div>
 
             {/* Property Images Carousel */}
-            <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-8">
-              {property.images.length > 0 ? (
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {property.images.map((image, index) => (
-                      <CarouselItem key={index}>
-                        <div className="h-[300px] md:h-[500px] w-full">
-                          <img
-                            src={image || "/placeholder-property.jpg"}
-                            alt={`${property.title} - Image ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="left-4" />
-                  <CarouselNext className="right-4" />
-                </Carousel>
-              ) : (
-                <div className="h-[300px] md:h-[500px] w-full flex items-center justify-center bg-gray-200">
-                  <p className="text-gray-500">No images available</p>
-                </div>
-              )}
-            </div>
+            {/* <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-8">
+                {property.images.length >0 ? (
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {property?.imageUrl.map((  image, index) => (
+                        <CarouselItem key={index}>
+                          <div className="h-[300px] md:h-[500px] w-full">
+                            <img
+                              src={image || "/placeholder-property.jpg"}
+                              alt={`${property.title} - Image ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="left-4" />
+                    <CarouselNext className="right-4" />
+                  </Carousel>
+                ) : (
+                  <div className="h-[300px] md:h-[500px] w-full flex items-center justify-center bg-gray-200">
+                    <p className="text-gray-500">No images available</p>
+                  </div>
+                )}
+              </div> */}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -184,7 +198,7 @@ const PropertyDetail = () => {
                     </div>
                     <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
                       <Maximize className="text-estate-secondary mb-2" size={24} />
-                      <span className="text-lg font-semibold">{property.sqft}</span>
+                      <span className="text-lg font-semibold">{property.squareFootage}</span>
                       <span className="text-sm text-gray-500">Sq Ft</span>
                     </div>
                     <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
@@ -248,35 +262,57 @@ const PropertyDetail = () => {
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-4">Seller Information</h3>
                   <div className="flex items-center mb-6">
-                    <div className="h-16 w-16 rounded-full bg-gray-200 overflow-hidden mr-4">
-                      {property.seller.profileImage ? (
-                        <img
-                          src={property.seller.profileImage}
-                          alt={property.seller.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center bg-estate-primary text-white">
-                          <User size={24} />
+                    {/* <div className="h-16 w-16 rounded-full bg-gray-200 overflow-hidden mr-4">
+                        {property.seller.profileImage ? (
+                          <img
+                            src={property.seller.profileImage}
+                            alt={property.seller.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center bg-estate-primary text-white">
+                            <User size={24} />
+                          </div>
+                        )}
+                      </div> */}
+                    {property?.seller ? (
+                      <>
+                        <div>
+                        <h4 className="font-semibold">{property.seller.name}</h4>
+                        <p className="text-sm text-gray-500">Property Seller</p>
+                      </div>
+                      <div className="space-y-3 mb-6">
+                        <div className="flex items-center text-gray-700">
+                          <Mail size={16} className="mr-2 text-gray-500" />
+                          <span>{property.seller.username}</span>
                         </div>
-                      )}
-                    </div>
-                    <div>
+                        <div className="flex items-center text-gray-700">
+                          <Phone size={16} className="mr-2 text-gray-500" />
+                          <span>{property.seller.phone}</span>
+                        </div>
+                      </div>
+                      </>
+                    ) : (
+                      <div>
+                        <p><strong>Seller:</strong> No information on seller</p>
+                      </div>
+                    )}
+                    {/* <div>
                       <h4 className="font-semibold">{property.seller.name}</h4>
                       <p className="text-sm text-gray-500">Property Seller</p>
-                    </div>
+                    </div> */}
                   </div>
 
-                  <div className="space-y-3 mb-6">
+                  {/* <div className="space-y-3 mb-6">
                     <div className="flex items-center text-gray-700">
                       <Mail size={16} className="mr-2 text-gray-500" />
-                      <span>{property.seller.email}</span>
+                      <span>{property.seller.username}</span>
                     </div>
                     <div className="flex items-center text-gray-700">
                       <Phone size={16} className="mr-2 text-gray-500" />
                       <span>{property.seller.phone}</span>
                     </div>
-                  </div>
+                  </div> */}
 
                   <Button
                     className="w-full"
