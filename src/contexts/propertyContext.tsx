@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 export interface Seller{
   name:string;
   username:string;
+  walletAddress:string;
 }
 export interface Property {
   _id:string
@@ -23,7 +24,7 @@ export interface Property {
 }
 
 interface PropertyContextType {
-  submitProperty: (formData: Omit<Property, "blockchainId">) => Promise<void>;
+  submitProperty: (formData: Property) => Promise<void>;
   fetchProperties: () => Promise<void>;
   deleteProperty: (id: string) => Promise<void>;  // ✅ added
   properties: Property[];
@@ -38,12 +39,12 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const submitProperty = async (formData: Omit<Property, "blockchainId">) => {
+  const submitProperty = async (formData:Property) => {
     setLoading(true);
     try {
       const propertyWithId: Property = {
-        ...formData,
-        blockchainId: uuidv4(),
+        ...formData
+        // blockchainId,
       };
 
       const res = await fetch("http://localhost:5000/api/property/addProperty", {

@@ -56,6 +56,8 @@ contract Escrow is Ownable, ReentrancyGuard {
     //Mapping escrowId to escrow details
     mapping(bytes32 => EscrowDetails) public escrows;
 
+    // Mapping to track deposits
+    mapping(bytes32 => uint256) public escrowDeposits;
     //Escrow fee percentage (in basis points, 100 = 1%)
     uint256 public escrowFeeRate;
 
@@ -104,7 +106,7 @@ contract Escrow is Ownable, ReentrancyGuard {
     event EscrowDisputed(
         bytes32 indexed escrowId,
         address disputedBy,
-        string Reason
+        string reason
     );
 
     event EscrowResolved(bytes32 indexed escrowId, EscrowStatus resolution);
@@ -202,6 +204,9 @@ contract Escrow is Ownable, ReentrancyGuard {
         if (escrow.status != EscrowStatus.Active) revert EscrowNotActive();
         if (msg.sender != escrow.buyer) revert NotAuthorized();
         if (msg.value != escrow.amount) revert InvalidAmount();
+        if (escrowDeposits[_escrowId] > 0) revert InvalidEscrowState(); // Prevent double deposit
+
+        escrowDeposits[_escrowId] = msg.value;
 
         emit FundsDeposited(_escrowId, msg.sender, msg.value);
     }
@@ -280,13 +285,16 @@ contract Escrow is Ownable, ReentrancyGuard {
 
         //Check if contract has enough funds
 
-        uint256 contractBalance = address(this).balance;
-        if (contractBalance < escrow.amount) revert InsufficientFunds();
+        // uint256 contractBalance = address(this).balance;
+        uint256 depositedAmount = escrowDeposits[_escrowId];
+        if (depositedAmount < escrow.amount) revert InsufficientFunds();
 
         //Calculate fees
         uint256 fee = (escrow.amount * escrowFeeRate) / 10000;
         uint256 sellerAmount = escrow.amount - fee;
 
+        // Reset deposit to avoid reentrancy risk
+        escrowDeposits[_escrowId] = 0;
         //Update escrow status
         escrow.status = EscrowStatus.Completed;
 
@@ -347,11 +355,13 @@ contract Escrow is Ownable, ReentrancyGuard {
         escrow.status = EscrowStatus.Cancelled;
 
         //Refund any deposited funds to the buyer
-        uint256 contractBalance = address(this).balance;
-        if (contractBalance > 0) {
-            (bool success, ) = payable(escrow.buyer).call{
-                value: contractBalance
-            }("");
+        // uint256 contractBalance = address(this).balance;
+        uint256 refundAmount = escrowDeposits[_escrowId];
+        escrowDeposits[_escrowId] = 0;
+        if (refundAmount > 0) {
+            (bool success, ) = payable(escrow.buyer).call{value: refundAmount}(
+                ""
+            );
             if (!success) revert TransferFailed();
         }
 
@@ -402,10 +412,12 @@ contract Escrow is Ownable, ReentrancyGuard {
             escrow.status = EscrowStatus.Cancelled;
 
             //Refund deposited funds to buyer
-            uint256 contractBalance = address(this).balance;
-            if (contractBalance > 0) {
+            // uint256 contractBalance = address(this).balance;
+            uint256 refundAmount = escrowDeposits[_escrowId];
+            escrowDeposits[_escrowId] = 0;
+            if (refundAmount > 0) {
                 (bool success, ) = payable(escrow.buyer).call{
-                    value: contractBalance
+                    value: refundAmount
                 }("");
                 if (!success) revert TransferFailed();
             }

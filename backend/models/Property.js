@@ -12,7 +12,6 @@ const propertySchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        default: uuidv4,
     },
     title:{type:String,required:true},
     description:{type:String},

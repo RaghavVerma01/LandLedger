@@ -104,15 +104,36 @@ router.post('/getuser', fetchuser, async (req, res) => {
 router.post('/bind-wallet',fetchuser,async(req,res)=>{
    const {walletAddress,signature} = req.body;
    const userId = req.user.id; //From JWT middleware
+   const user = await User.findById(userId);
+
+
 
    const message = `Sign to link your wallet: ${walletAddress}`;
 
    const recoveredAddress = ethers.verifyMessage(message,signature);
 
+   if(user.walletAddress === null){
+      await User.findByIdAndUpdate(userId,{walletAddress})
+      console.log("Wallet Address was undefined, Wallet Bound successfully")
+      return res.status(200).json({message:"Wallet bound Successfully"})
+   }
+
    if(recoveredAddress.toLowerCase()!==walletAddress.toLowerCase()){
       return res.status(401).json({message:"Signature verification failed"});
    }
 
+
+
+   // Check if some other user has this
+   const existingUser = await User.findOne({ walletAddress: walletAddress.toLowerCase() });
+   if (existingUser && existingUser._id.toString() !== userId) {
+     console.log("Wallet already bound to another user")
+     return res.status(400).json({ msg: "Wallet already bound to another user" });
+   }
+   if(recoveredAddress.toLowerCase()!==user.walletAddress.toLowerCase()){
+      console.log("Wallet Mismatch");
+      return res.status(403).json({msg:"Wallet Mismatch"});
+   }
    //Save to database
    await User.findByIdAndUpdate(userId,{walletAddress});
    

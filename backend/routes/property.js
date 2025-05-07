@@ -9,7 +9,7 @@ const { body, validationResult } = require('express-validator');
 router.get('/fetchProperty', fetchuser, async (req, res) => {
   try {
     const property = await Property.find()
-    .populate('userId', 'name username').lean()
+    .populate('userId', 'name username walletAddress').lean()
 
     const properties = property.map((p)=>{
       const{userId,...rest} = p
@@ -66,13 +66,13 @@ router.post(
           bathrooms,
           yearBuilt,
           status,
+          blockchainId,
           features,
-          imageUrls
+          imageUrl
         } = req.body;
-  
+        // console.log("Token ID is: ",tokenId)
         const newProperty = new Property({
           userId: req.user.id,
-        //  userId: '661e9d68bc2f8a28ec6a1c2b',
           title,
           description,
           location,
@@ -82,8 +82,9 @@ router.post(
           bathrooms,
           yearBuilt,
           status,
+          blockchainId,
           features,
-          imageUrls
+          imageUrl
         });
   
         const saved = await newProperty.save();
@@ -94,48 +95,48 @@ router.post(
       }
     }
   );
-  router.post("/properties", async (req, res) => {
-    try {
-      const {
-        title,
-        description,
-        location,
-        price,
-        squareFootage,
-        bedrooms,
-        bathrooms,
-        yearBuilt,
-        status,
-        tokenId,
-        wallet,
-        features,
-        imageUrl
-      } = req.body;
+  // router.post("/properties", async (req, res) => {
+  //   try {
+  //     const {
+  //       title,
+  //       description,
+  //       location,
+  //       price,
+  //       squareFootage,
+  //       bedrooms,
+  //       bathrooms,
+  //       yearBuilt,
+  //       status,
+  //       tokenId,
+  //       wallet,
+  //       features,
+  //       imageUrl
+  //     } = req.body;
   
-      const newProperty = new Property({
-        title,
-        description,
-        location,
-        price,
-        squareFootage,
-        bedrooms,
-        bathrooms,
-        yearBuilt,
-        status,
-        tokenId,
-        wallet,
-        features,
-        imageUrl
-      });
+  //     const newProperty = new Property({
+  //       title,
+  //       description,
+  //       location,
+  //       price,
+  //       squareFootage,
+  //       bedrooms,
+  //       bathrooms,
+  //       yearBuilt,
+  //       status,
+  //       tokenId,
+  //       wallet,
+  //       features,
+  //       imageUrl
+  //     });
   
-      await newProperty.save();
+  //     await newProperty.save();
   
-      res.status(201).json({ message: "Property saved successfully." });
-    } catch (error) {
-      console.error("❌ Error saving property:", error);
-      res.status(500).json({ message: "Server error." });
-    }
-  });
+  //     res.status(201).json({ message: "Property saved successfully." });
+  //   } catch (error) {
+  //     console.error("❌ Error saving property:", error);
+  //     res.status(500).json({ message: "Server error." });
+  //   }
+  // });
 
   router.delete('/delete/:id', fetchuser, async (req, res) => {
     try {

@@ -126,7 +126,7 @@ const SellProperty = () => {
       // const signer = propertyContract.runner;
       const signerAddress = await signer.getAddress();
       const tokenURI = `https://landledger-metadata.com/dummy/${Date.now()}`
-      console.log(signerAddress)
+      // console.log(signerAddress)
 
       const tx = await propertyContract.createProperty(
         signerAddress,
@@ -140,7 +140,7 @@ const SellProperty = () => {
       );
       const receipt = await tx.wait();
 
-      const tokenId = receipt.logs
+      const tokenId = await receipt.logs
       .map((log: any) => {
         try {
           return propertyContract.interface.parseLog(log);
@@ -154,21 +154,12 @@ const SellProperty = () => {
         throw new Error("Token ID not found in logs");
       }
 
-      await fetch("http://localhost:5000/api/property/properties", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          tokenId,
-          wallet: signerAddress,
-          features,
-          imageUrl, // if applicable
-        }),
-      });
+
       const propertyDetails = await fetchPropertyFromChain(tokenId);
       console.log("Fetched Property Details: ", propertyDetails);
       await submitProperty({
         ...formData,
+        blockchainId:tokenId,
         features: features,
         imageUrl: imageUrl,
       });
@@ -473,7 +464,7 @@ const SellProperty = () => {
                         id="yearBuilt"
                         type="number"
                         min="1800"
-                        max={new Date().getFullYear()}
+                        max="4000"
                         placeholder={`e.g. ${new Date().getFullYear() - 5}`}
                         // value={formData.yearBuilt}
                         onChange={handleChange}

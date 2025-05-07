@@ -20,7 +20,8 @@ const userSchema = new mongoose.Schema({
         type:String,
         default:null,
         lowercase:true,
-        unique:true
+        unique:true,
+        sparse:true,
     },
     date:{
         type:Date,

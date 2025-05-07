@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { ethers } from "ethers";
+import { useToast } from "@/hooks/use-toast";
+
 
 interface WalletContextType {
     currentAccount: string | null;
@@ -39,9 +41,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             };
             checkConnection();
         },[]);
-
+    const {toast} = useToast();
     const bindWallet = async (address,signature )=>{
-        await fetch('http://localhost:5000/api/auth/bind-wallet',{
+        const res = await fetch('http://localhost:5000/api/auth/bind-wallet',{
             method:'POST',
             headers:{
                 'Content-Type':'application/json',
@@ -50,9 +52,35 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             body:JSON.stringify({
                 walletAddress:address,
                 signature:signature,
-            })
+            }),
+        });
 
-        })
+        if (!res.ok) {
+            const error = await res.json();
+            const err = new Error(error.msg || "Wallet Binding Failed");
+            //@ts-ignore
+            err.status = res.status;
+            throw err;
+            // if (res.status === 400) {
+            //   // Wallet already bound to another user
+            //   toast({
+            //     title: "Wallet Binding Failed",
+            //     description: "This wallet is already bound to another account.",
+            //     variant: "destructive",
+            //   });
+      
+            //   // Clear wallet from app state and localStorage
+            //   setCurrentAccount(null);
+            //   localStorage.removeItem("walletAddress");
+      
+            //   // Optional: block sensitive actions or show warning in UI
+            // //   setWalletUnauthorized(true);
+      
+            //   return;
+            // }else {
+            //   throw new Error(`Unexpected error: ${res.status}`);
+            // }
+          }
     }
         return(
             <WalletContext.Provider value = {{bindWallet,currentAccount,connectWallet}}>

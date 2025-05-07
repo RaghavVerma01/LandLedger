@@ -1,0 +1,1 @@
+ganache-cli --db ./ganache-data --mnemonic "myth like bonus..." -i 5777 -p 7545

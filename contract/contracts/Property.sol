@@ -134,47 +134,7 @@ contract Property is
         emit PropertyListed(newTokenId, msg.sender, price);
         return newTokenId;
     }
-    // function createProperty(
-    //     address to,
-    //     string memory tokenURI,
-    //     string memory location,
-    //     uint256 price,
-    //     uint256 sqFootage,
-    //     uint256 bedrooms,
-    //     uint256 bathrooms,
-    //     uint256 yearBuilt
-    // ) external onlyOwner nonReentrant returns (uint256) {
-    //     if (bytes(tokenURI).length == 0 || bytes(location).length == 0)
-    //         revert InvalidInput();
-    //     if (
-    //         price == 0 ||
-    //         sqFootage == 0 ||
-    //         bedrooms == 0 ||
-    //         bathrooms == 0 ||
-    //         yearBuilt == 0
-    //     ) revert InvalidInput();
-
-    //     // Increment the token ID tracker
-    //     _tokenIdTracker += 1;
-    //     uint256 newTokenId = _tokenIdTracker;
-
-    //     _mint(to, newTokenId);
-    //     _setTokenURI(newTokenId, tokenURI);
-
-    //     _propertyDetails[newTokenId] = PropertyDetails({
-    //         location: location,
-    //         price: price,
-    //         status: PropertyStatus.Available,
-    //         sqFootage: sqFootage,
-    //         bedrooms: bedrooms,
-    //         bathrooms: bathrooms,
-    //         yearBuilt: yearBuilt
-    //     });
-
-    //     emit PropertyListed(newTokenId, to, price);
-    //     return newTokenId;
-    // }
-
+    
     /**
      * @dev Allows purchase of property with ETH
      */

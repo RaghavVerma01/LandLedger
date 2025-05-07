@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePropertyContext } from "@/contexts/propertyContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -21,16 +21,18 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 
 const Properties = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 200]);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
   const [bedroomsFilter, setBedroomsFilter] = useState<string>("any");
   const [bathroomsFilter, setBathroomsFilter] = useState<string>("any");
   const [statusFilter, setStatusFilter] = useState<string>("any");
   const [showFilters, setShowFilters] = useState(false);
 
-  const { properties, loading, error, deleteProperty } = usePropertyContext();
+  const { properties, fetchProperties, loading, error, deleteProperty } = usePropertyContext();
+  useEffect(()=>{
+    fetchProperties();
+  },[]);
   console.log("All listed properties");
   console.log("Properties: ",properties);
-
   // Filter properties based on search and filter criteria
   const filteredProperties = properties.filter((property) => {
     const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

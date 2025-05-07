@@ -75,7 +75,7 @@ const PropertyDetail = () => {
   };
 
   const handleBuy = async () => {
-    return 0;
+  
   }
   const handlePurchase = () => {
     // In a real app, this would initiate the blockchain transaction
