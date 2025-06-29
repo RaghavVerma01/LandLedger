@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { usePropertyContext } from "@/contexts/propertyContext";
+import BuyButton from "@/components/BuyButton";
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -242,12 +243,13 @@ const PropertyDetail = () => {
                           <p className="text-xs text-gray-500 font-mono mb-2 truncate">
                             Token ID: 0x7a69c0256e751e5c8a778db0b7b3bf96c8753135
                           </p>
-                          <Button
+                          {/* <Button
                             className="w-full mt-2 bg-estate-secondary hover:bg-estate-secondary/80"
                             onClick={handlePurchase}
-                          >
+                          > */}
+                          <BuyButton tokenId={property._id} price={property.price} seller={property.seller.walletAddress}/>
                             Purchase Property
-                          </Button>
+                          {/* </BuyButton> */}
                         </div>
                       </div>
                     </>

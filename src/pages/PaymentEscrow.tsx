@@ -126,7 +126,8 @@ const PaymentEscrow = () => {
               <Card className="shadow-lg border-estate-primary border-opacity-10">
                 <CardHeader className="bg-gradient-to-r from-estate-primary/5 to-estate-secondary/5">
                   <CardTitle className="text-estate-primary flex items-center gap-2">
-                    <Bitcoin size={24} /> Escrow Deposit
+                    {/* <Bitcoin size={24} /> Escrow Deposit */}
+                    <img src="public\assets\ether.png" alt="" className="etherimage" /> Escrow Deposit
                   </CardTitle>
                   <CardDescription>
                     Enter the details below to make your escrow payment for the property.
@@ -180,7 +181,8 @@ const PaymentEscrow = () => {
                           className="w-full"
                           onClick={connectWallet}
                         >
-                          <Bitcoin className="mr-2 h-4 w-4" />
+                          {/* <Bitcoin className="mr-2 h-4 w-4" /> */}
+                          <img src="public\assets\ether.png" alt="" className="etherimage"/>
                           Connect Wallet
                         </Button>
                       )}
