@@ -2,8 +2,8 @@ import { ethers } from "ethers";
 import PropertyABI from '../contracts/abis/Property.json'
 import EscrowABI from '../contracts/abis/Escrow.json'
 
-export const propertyAddress:string = "0xCabe9d1055da5CB2EeD6Fa60f3694BB06CB3b1A8";   
-export const escrowAddress:string = "0xBF74a3492071AF2b2762847045e2BB02d9e42739";
+export const propertyAddress:string = "0x75d6A01849b86825c4895cB17318fD804EDd29ce";   
+export const escrowAddress:string = "0x3b429368A3A656318933Bc27EC83E89B3d39d2eb";
 
 export const getContracts = async()=>{
     if(!window.ethereum){

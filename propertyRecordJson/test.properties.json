@@ -1,0 +1,280 @@
+[{
+  "_id": {
+    "$oid": "6817cd373195f88e70f7c872"
+  },
+  "userId": {
+    "$oid": "6803b3ac9a25cd06f29edf36"
+  },
+  "blockchainId": "1",
+  "title": "The Gilded Penthouse",
+  "description": "Experience the pinnacle of luxury living in The Gilded Penthouse, offering breathtaking panoramic views of Central Park and the Manhattan skyline. This opulent residence boasts exquisite finishes, soaring ceilings, and unparalleled privacy. Enjoy exclusive access to building amenities and the vibrant culture of New York City.",
+  "location": "Central Park South, New York, USA",
+  "price": 620.5,
+  "squareFootage": 6800,
+  "bedrooms": 6,
+  "bathrooms": 5,
+  "yearBuilt": 2019,
+  "status": "Available",
+  "features": [
+    "Private Elevator Access",
+    "Wraparound Terrace",
+    "Gourmet Eat-in Kitchen",
+    "Formal Dining Room",
+    "Home Theater",
+    "Wine Cellar",
+    "Smart Home System"
+  ],
+  "imageUrls": [],
+  "createdAt": {
+    "$date": "2025-05-04T20:25:27.196Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-04T20:25:27.196Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6817ce6b44e0f7be96cd4361"
+  },
+  "userId": {
+    "$oid": "6803b3ac9a25cd06f29edf36"
+  },
+  "blockchainId": "2",
+  "title": "The Coastal Breeze Villa",
+  "description": "Escape to the serene beauty of Malibu in The Coastal Breeze Villa. This stunning beachfront property offers direct access to the Pacific Ocean and boasts breathtaking sunset views. Enjoy luxurious indoor-outdoor living with spacious decks and high-end amenities.",
+  "location": "Malibu, California, USA",
+  "price": 315.9,
+  "squareFootage": 3500,
+  "bedrooms": 4,
+  "bathrooms": 4,
+  "yearBuilt": 2021,
+  "status": "Available",
+  "features": [
+    "Private Beach Access",
+    "Oceanfront Deck",
+    "Infinity Pool",
+    "Outdoor Kitchen and Bar",
+    "Gourmet Kitchen with Ocean Views",
+    "Smart Home Technology",
+    "Floor-to-Ceiling Glass Doors",
+    "Secure Gated Entry",
+    "Garage Parking"
+  ],
+  "imageUrls": [],
+  "createdAt": {
+    "$date": "2025-05-04T20:30:35.877Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-04T20:30:35.877Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6817d10044e0f7be96cd4463"
+  },
+  "userId": {
+    "$oid": "6809c7787328930e631a2790"
+  },
+  "blockchainId": "3",
+  "title": "Aerium Skyloft",
+  "description": "Experience elevated living in Aerium Skyloft, a sophisticated residence integrated into Neo-Kyoto's advanced vertical city structure. Enjoy panoramic aerial views, seamless smart home technology, and access to the city's efficient transit network.",
+  "location": "Neo-Kyoto, Japan (Vertical City Sector)",
+  "price": 450,
+  "squareFootage": 2100,
+  "bedrooms": 3,
+  "bathrooms": 3,
+  "yearBuilt": 2065,
+  "status": "Available",
+  "features": [
+    "Integrated Autonomous Vehicle Dock",
+    "Holographic Projection System",
+    "Adaptive Climate Control",
+    "Bio-Integrated Vertical Garden",
+    "AI-Powered Home Assistant",
+    "Noise-Canceling Window Panes",
+    "Direct Maglev Transit Access",
+    "Renewable Energy Grid Integration",
+    "Modular Interior Design"
+  ],
+  "imageUrls": [],
+  "createdAt": {
+    "$date": "2025-05-04T20:41:36.703Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-04T20:41:36.703Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6817d18a44e0f7be96cd4473"
+  },
+  "userId": {
+    "$oid": "6809c7787328930e631a2790"
+  },
+  "blockchainId": "4",
+  "title": "Veridian Eco-Dome",
+  "description": "Embrace harmonious living within Veridian Eco-Dome, a self-contained residence within a cutting-edge bio-arcology. Experience sustainable technologies, lush internal ecosystems, and a vibrant community focused on ecological balance.",
+  "location": "Sustainable Bio-Arcology, Amazon Basin",
+  "price": 310,
+  "squareFootage": 1950,
+  "bedrooms": 2,
+  "bathrooms": 2,
+  "yearBuilt": 2070,
+  "status": "Available",
+  "features": [
+    "Closed-Loop Water Recycling",
+    "Integrated Vertical Farming System",
+    "Biometric Access Control",
+    "Atmospheric Purification System",
+    "Communal Biodome Access",
+    "Renewable Energy Microgrid",
+    "AI-Powered Resource Management",
+    "Biodegradable Construction Materials",
+    "Electric Personal Mobility Vehicle Dock"
+  ],
+  "imageUrls": [],
+  "createdAt": {
+    "$date": "2025-05-04T20:43:54.297Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-04T20:43:54.297Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6817d22444e0f7be96cd4485"
+  },
+  "userId": {
+    "$oid": "6809c7787328930e631a2790"
+  },
+  "blockchainId": "5",
+  "title": "Grand Victorian Manor",
+  "description": "Step back in time in Grand Victorian Manor, a meticulously preserved residence boasting stunning architectural details from the late 19th century. Enjoy the elegance of a bygone era with spacious rooms, high ceilings, and a charming Southern porch",
+  "location": "Historic District, Savannah, Georgia, USA",
+  "price": 210.7,
+  "squareFootage": 4700,
+  "bedrooms": 5,
+  "bathrooms": 3,
+  "yearBuilt": 1888,
+  "status": "Available",
+  "features": [
+    "Wrap-around Porch",
+    "Original Hardwood Floors",
+    "Soaring Ceilings",
+    "Ornate Fireplaces",
+    "Period Lighting Fixtures",
+    "Formal Parlor and Dining Room",
+    "Mature Landscaped Gardens",
+    "Carriage House",
+    "Historic Landmark Status"
+  ],
+  "imageUrls": [],
+  "createdAt": {
+    "$date": "2025-05-04T20:46:28.015Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-04T20:46:28.015Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6817d2a644e0f7be96cd448b"
+  },
+  "userId": {
+    "$oid": "6809c7787328930e631a2790"
+  },
+  "blockchainId": "6",
+  "title": "Rustic Colonial Farmhouse",
+  "description": "Embrace the tranquility of the countryside in Rustic Colonial Farmhouse, a charming and historic property with original features dating back to the 18th century. Enjoy wide-plank floors, exposed beams, and a sprawling acreage perfect for a peaceful retreat.\n",
+  "location": "Rural Countryside, New England, USA",
+  "price": 138.9,
+  "squareFootage": 3500,
+  "bedrooms": 4,
+  "bathrooms": 2,
+  "yearBuilt": 1802,
+  "status": "Available",
+  "features": [
+    "Wide-Plank Wood Floors",
+    "Exposed Beams",
+    "Stone Fireplaces",
+    "Spacious Country Kitchen",
+    "Barn and Outbuildings",
+    "Apple Orchard",
+    "Stone Walls",
+    "Pastoral Views",
+    "Abundant Natural Light"
+  ],
+  "imageUrls": [],
+  "createdAt": {
+    "$date": "2025-05-04T20:48:38.659Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-04T20:48:38.659Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68346cfd07ef5874d4e7a12b"
+  },
+  "userId": {
+    "$oid": "6803b3ac9a25cd06f29edf36"
+  },
+  "blockchainId": "7",
+  "title": "New Proerty",
+  "description": "Something",
+  "location": "Riverside Community, Oregon, USA",
+  "price": 105,
+  "squareFootage": 1500,
+  "bedrooms": 3,
+  "bathrooms": 1,
+  "yearBuilt": 2018,
+  "status": "Available",
+  "features": [
+    "Pool",
+    "Garage"
+  ],
+  "imageUrls": [],
+  "createdAt": {
+    "$date": "2025-05-26T13:30:37.106Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-26T13:30:37.106Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68346fe107ef5874d4e7a13b"
+  },
+  "userId": {
+    "$oid": "6803b3ac9a25cd06f29edf36"
+  },
+  "blockchainId": "8",
+  "title": "Gaur Skyline",
+  "description": "High-rise apartment complexes",
+  "location": "23 Avenue, NY",
+  "price": 45.5,
+  "squareFootage": 1500,
+  "bedrooms": 2,
+  "bathrooms": 1,
+  "yearBuilt": 2010,
+  "status": "Available",
+  "features": [
+    "Garage",
+    "Security"
+  ],
+  "imageUrls": [],
+  "createdAt": {
+    "$date": "2025-05-26T13:42:57.173Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-26T13:42:57.173Z"
+  },
+  "__v": 0
+}]

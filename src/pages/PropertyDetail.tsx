@@ -7,7 +7,6 @@ import { Property } from "@/contexts/propertyContext";
 // import { Property, mockProperties } from "@/models/property";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { buyProperty } from "@/utils/buyProperty";
 import {
   Carousel,
   CarouselContent,
@@ -32,6 +31,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { usePropertyContext } from "@/contexts/propertyContext";
 import BuyButton from "@/components/BuyButton";
+import { propertyAddress } from "@/utils/contracts";
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -153,11 +153,11 @@ const PropertyDetail = () => {
             </div>
 
             {/* Property Images Carousel */}
-            {/* <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-8">
-                {property.images.length >0 ? (
+            <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-8">
+                {property.imageUrls.length >0 ? (
                   <Carousel className="w-full">
                     <CarouselContent>
-                      {property?.imageUrl.map((  image, index) => (
+                      {property?.imageUrls.map((  image, index) => (
                         <CarouselItem key={index}>
                           <div className="h-[300px] md:h-[500px] w-full">
                             <img
@@ -177,7 +177,7 @@ const PropertyDetail = () => {
                     <p className="text-gray-500">No images available</p>
                   </div>
                 )}
-              </div> */}
+              </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -241,14 +241,13 @@ const PropertyDetail = () => {
                             <span className="text-sm text-gray-500">Listed on chain: April 12, 2023</span>
                           </div>
                           <p className="text-xs text-gray-500 font-mono mb-2 truncate">
-                            Token ID: 0x7a69c0256e751e5c8a778db0b7b3bf96c8753135
+                            Token ID: {property.blockchainId}
                           </p>
                           {/* <Button
                             className="w-full mt-2 bg-estate-secondary hover:bg-estate-secondary/80"
                             onClick={handlePurchase}
                           > */}
-                          <BuyButton tokenId={property._id} price={property.price} seller={property.seller.walletAddress}/>
-                            Purchase Property
+                          <BuyButton tokenId={property.blockchainId} price={property.price} seller={property.seller.walletAddress} propertyContract={propertyAddress}/>
                           {/* </BuyButton> */}
                         </div>
                       </div>

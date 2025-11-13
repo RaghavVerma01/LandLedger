@@ -15,6 +15,7 @@ import PaymentEscrow from "./pages/PaymentEscrow";
 import Profile from "./pages/Profile";
 import Aiprediction from "./pages/Aiprediction";
 import React from "react";
+import SellerDashboard from "./pages/SellerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,8 @@ const App = () => (
             <Route path="/properties" element={<Properties />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/sellerdashboard" element={<SellerDashboard />} />
+
             <Route path="/signup" element={<Signup />} />
             <Route path="/sell" element={<SellProperty />} />
             <Route path="/payment" element={<PaymentEscrow />} />

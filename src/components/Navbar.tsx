@@ -199,6 +199,11 @@ const Navbar = () => {
                           <span>Connect Wallet</span>
                         </div>
                       </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <div className="flex items-center">
+                          <Link to="/sellerdashboard">Seller Dashboard</Link>
+                        </div>
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={handleLogout}>
                         <div className="flex items-center text-red-500">
                           <LogOut className="mr-2 h-4 w-4" />
@@ -294,6 +299,13 @@ const Navbar = () => {
                       className="mr-2 h-5 w-5"
                     />
                     {account ? `Disconnect Wallet (${account.substring(0, 6)}...${account.substring(account.length - 4)})` : 'Connect Wallet'}
+                  </button>
+                  <button
+                    onClick={account ? disconnectWallet : connectWallet}
+                    className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-estate-secondary"
+                  >
+                    <Link to="/sellerdashboard">Seller Dashboard</Link>
+                    
                   </button>
                   <button onClick={handleLogout} className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-red-500 hover:text-red-700">
                     <LogOut className="mr-2 h-5 w-5" />

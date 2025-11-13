@@ -21,7 +21,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 
 const Properties = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 2000]);
   const [bedroomsFilter, setBedroomsFilter] = useState<string>("any");
   const [bathroomsFilter, setBathroomsFilter] = useState<string>("any");
   const [statusFilter, setStatusFilter] = useState<string>("any");
@@ -197,7 +197,7 @@ const Properties = () => {
                   bathrooms={property.bathrooms}
                   sqft={property.squareFootage}
                   yearBuilt={property.yearBuilt}
-                  imageUrl={property.imageUrl || "/placeholder-property.jpg"}
+                  imageUrl={property.imageUrls[0] || "/placeholder-property.jpg"}
                   status={property.status}
                 />
               ))
@@ -209,7 +209,7 @@ const Properties = () => {
                   className="mt-4"
                   onClick={() => {
                     setSearchQuery("");
-                    setPriceRange([0, 100]);
+                    setPriceRange([0, 2000]);
                     setBedroomsFilter("any");
                     setBathroomsFilter("any");
                     setStatusFilter("any");

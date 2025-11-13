@@ -19,7 +19,7 @@ export interface Property {
   yearBuilt: number;
   blockchainId: string;
   features?: string[];
-  imageUrl: string[];
+  imageUrls: string[];
   seller: Seller|null;
 }
 
@@ -42,18 +42,19 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const submitProperty = async (formData:Property) => {
     setLoading(true);
     try {
-      const propertyWithId: Property = {
-        ...formData
-        // blockchainId,
-      };
+      // const propertyWithId: Property = {
+      //   ...formData
+      //   // blockchainId,
+      // };
 
       const res = await fetch("http://localhost:5000/api/property/addProperty", {
         method: "POST",
         headers: {
           "auth-token": localStorage.getItem("token"),
-          "Content-Type": "application/json",
+          // "Content-Type": "application/json",
         },
-        body: JSON.stringify(propertyWithId),
+        // body: JSON.stringify(propertyWithId),
+        body:formData,
       });
       const data = await res.json();
       if (!res.ok) {
@@ -76,7 +77,6 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const res = await fetch("http://localhost:5000/api/property/fetchProperty", {
         headers: {
           "Content-Type": "application/json",
-          "auth-token": localStorage.getItem('token')
         },
       });
 

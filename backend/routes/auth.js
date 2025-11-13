@@ -139,5 +139,6 @@ router.post('/bind-wallet',fetchuser,async(req,res)=>{
    
    res.json({message:"Wallet bound successfully"})
 })
+
 module.exports = router
 

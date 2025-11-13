@@ -4,9 +4,13 @@ const fetchuser = require('../middleware/fetchuser');
 const Property = require('../models/Property');
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({storage});
+const cloudinary = require('../utils/cloudinaryConfig');
 
 
-router.get('/fetchProperty', fetchuser, async (req, res) => {
+router.get('/fetchProperty', async (req, res) => {
   try {
     const property = await Property.find()
     .populate('userId', 'name username walletAddress').lean()
@@ -36,6 +40,7 @@ router.get('/fetchProperty', fetchuser, async (req, res) => {
 router.post(
     '/addProperty',
     fetchuser,
+    upload.array('images',5),
     [
       body('title').notEmpty().withMessage('Title is required'),
       body('location').notEmpty().withMessage('Location is required'),
@@ -68,8 +73,24 @@ router.post(
           status,
           blockchainId,
           features,
-          imageUrl
+          // imageUrl
         } = req.body;
+
+        const imageUrls = [];
+
+        for(const file of req.files){
+          const result = await new Promise((resolve,reject)=>{
+            const stream = cloudinary.uploader.upload_stream(
+              {resource_type:'image'},
+              (err,result)=>{
+                if(err) reject(err);
+                else resolve(result);
+              }
+            );
+            stream.end(file.buffer)
+          });
+          imageUrls.push(result.secure_url);
+        }
         // console.log("Token ID is: ",tokenId)
         const newProperty = new Property({
           userId: req.user.id,
@@ -84,7 +105,7 @@ router.post(
           status,
           blockchainId,
           features,
-          imageUrl
+          imageUrls
         });
   
         const saved = await newProperty.save();
@@ -95,6 +116,35 @@ router.post(
       }
     }
   );
+
+  // POST /api/property/upload-images
+
+  router.post('/upload-images',fetchuser,upload.array('images',5), async(req,res)=>{
+    try{
+      const urls = [];
+      for(const file of req.files){
+        const result = await new Promise((resolve,reject)=>{
+          const stream = cloudinary.uploader.upload_stream(
+            {resource_type:"image"},
+            (err,result)=>{
+              if(err) reject (err);
+              else resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
+
+        urls.push(result.secure_url);
+      }
+
+      res.status(200).json({imageUrls:urls});
+    }catch(err){
+      console.error("Immage upload error: ",err);
+    }
+
+    res.status(500).json({error: "Failed to upload images"});
+  });
+
   // router.post("/properties", async (req, res) => {
   //   try {
   //     const {

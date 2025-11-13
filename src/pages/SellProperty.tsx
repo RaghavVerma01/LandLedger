@@ -62,7 +62,7 @@ const SellProperty = () => {
     imageUrls: []
   });
   // Change later, hardcoded for now
-  const imageUrl = ["https://example.com/nicehouse"]
+  // const imageUrl = ["https://example.com/nicehouse"]
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -74,7 +74,7 @@ const SellProperty = () => {
         preview: URL.createObjectURL(file),
       }));
 
-      // setImages([...images, ...newImages]);
+      setImages([...images, ...newImages]);
     }
   };
 
@@ -109,38 +109,43 @@ const SellProperty = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    if (!formData.title || !formData.location || !formData.price || !formData.squareFootage || !formData.bedrooms || !formData.bathrooms || !formData.yearBuilt) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      const { propertyContract,signer } = await getContracts();
-      // const signer = propertyContract.runner;
-      const signerAddress = await signer.getAddress();
-      const tokenURI = `https://landledger-metadata.com/dummy/${Date.now()}`
-      // console.log(signerAddress)
+  if (
+    !formData.title || !formData.location || !formData.price ||
+    !formData.squareFootage || !formData.bedrooms ||
+    !formData.bathrooms || !formData.yearBuilt
+  ) {
+    toast({
+      title: "Missing Information",
+      description: "Please fill in all required fields.",
+      variant: "destructive",
+    });
+    setIsLoading(false);
+    return;
+  }
 
-      const tx = await propertyContract.createProperty(
-        signerAddress,
-        tokenURI, // tokenURI
-        formData.location,
-        ethers.parseEther(formData.price.toString()),
-        formData.squareFootage,
-        formData.bedrooms,
-        formData.bathrooms,
-        formData.yearBuilt
-      );
-      const receipt = await tx.wait();
+  try {
+    // Step 1: Mint the property on-chain
+    const { propertyContract, signer } = await getContracts();
+    const signerAddress = await signer.getAddress();
+    const tokenURI = `https://landledger-metadata.com/dummy/${Date.now()}`;
 
-      const tokenId = await receipt.logs
+    const tx = await propertyContract.createProperty(
+      signerAddress,
+      tokenURI,
+      formData.location,
+      ethers.parseEther(formData.price.toString()),
+      formData.squareFootage,
+      formData.bedrooms,
+      formData.bathrooms,
+      formData.yearBuilt
+    );
+
+    const receipt = await tx.wait();
+
+    const tokenId = receipt.logs
       .map((log: any) => {
         try {
           return propertyContract.interface.parseLog(log);
@@ -148,58 +153,176 @@ const SellProperty = () => {
           return null;
         }
       })
-      .find((parsed: any) => parsed && parsed.name === "PropertyListed")?.args?.tokenId?.toString();
+      .find((parsed: any) => parsed?.name === "PropertyListed")?.args?.tokenId?.toString();
 
-      if (!tokenId) {
-        throw new Error("Token ID not found in logs");
-      }
+    if (!tokenId) throw new Error("Token ID not found in logs");
+
+    // Step 2: Prepare FormData to send all data + images to backend
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("description", formData.description);
+    form.append("location", formData.location);
+    form.append("price", formData.price.toString());
+    form.append("squareFootage", formData.squareFootage.toString());
+    form.append("bedrooms", formData.bedrooms.toString());
+    form.append("bathrooms", formData.bathrooms.toString());
+    form.append("yearBuilt", formData.yearBuilt.toString());
+    form.append("status", formData.status);
+    form.append("blockchainId", tokenId);
+
+    features.forEach((f) => form.append("features[]", f));
+    images.forEach((img) => form.append("images", img.file)); // 'images' matches multer field
+
+    // Step 3: Submit using context
+    await submitProperty(form);
+
+    toast({
+      title: "Property Listed",
+      description: "Your property is now live on LandLedger.",
+    });
+
+    // Reset form
+    setFormData({
+      title: "",
+      description: "",
+      location: "",
+      price: 0,
+      squareFootage: 0,
+      bedrooms: 0,
+      bathrooms: 0,
+      yearBuilt: 0,
+      status: "Available",
+      imageUrls: [],
+    });
+    setImages([]);
+    setFeatures([]);
+    setTimeout(() => navigate("/properties"), 1500);
+
+  } catch (error) {
+    console.error("❌ Error during handleSubmit:", error);
+    toast({
+      title: "Submission Failed",
+      description: "There was an error submitting the property. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+  //   if (!formData.title || !formData.location || !formData.price || !formData.squareFootage || !formData.bedrooms || !formData.bathrooms || !formData.yearBuilt) {
+  //     toast({
+  //       title: "Missing Information",
+  //       description: "Please fill in all required fields.",
+  //       variant: "destructive",
+  //     });
+  //     setIsLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const { propertyContract,signer } = await getContracts();
+  //     // const signer = propertyContract.runner;
+  //     const signerAddress = await signer.getAddress();
+  //     const tokenURI = `https://landledger-metadata.com/dummy/${Date.now()}`
+  //     // console.log(signerAddress)
+
+  //     const tx = await propertyContract.createProperty(
+  //       signerAddress,
+  //       tokenURI, // tokenURI
+  //       formData.location,
+  //       ethers.parseEther(formData.price.toString()),
+  //       formData.squareFootage,
+  //       formData.bedrooms,
+  //       formData.bathrooms,
+  //       formData.yearBuilt
+  //     );
+  //     const receipt = await tx.wait();
+
+  //     const tokenId = await receipt.logs
+  //     .map((log: any) => {
+  //       try {
+  //         return propertyContract.interface.parseLog(log);
+  //       } catch {
+  //         return null;
+  //       }
+  //     })
+  //     .find((parsed: any) => parsed && parsed.name === "PropertyListed")?.args?.tokenId?.toString();
+
+  //     if (!tokenId) {
+  //       throw new Error("Token ID not found in logs");
+  //     }
 
 
-      const propertyDetails = await fetchPropertyFromChain(tokenId);
-      console.log("Fetched Property Details: ", propertyDetails);
-      await submitProperty({
-        ...formData,
-        blockchainId:tokenId,
-        features: features,
-        imageUrl: imageUrl,
-      });
+  //     const uploadForm = new FormData();
+  //     images.forEach((img) => {
+  //       uploadForm.append('images',img.file)
+  //     });
+
+  //     const imageRes = await fetch("http://localhost:5000/api/property/upload-images",{
+  //       method:"POST",
+  //       headers:{
+  //         "auth-token":localStorage.getItem('token')
+  //       },
+  //       body:uploadForm,
+  //     })
+
+  //     const {imageUrls} = await imageRes.json();
+  //     if(!imageUrls|| !Array.isArray(imageUrls)){
+  //       throw new Error("Image upload failed or did not return image URLs");
+  //     }
+
+
+
+
+  //     const propertyDetails = await fetchPropertyFromChain(tokenId);
+  //     console.log("Fetched Property Details: ", propertyDetails);
+  //     await submitProperty({
+  //       ...formData,
+  //       blockchainId:tokenId,
+  //       features: features,
+  //       imageUrl: imageUrl,
+  //     });
       
-      toast({
-        title: "Property Listed",
-        description: "Your property is now live on LandLedger.",
-      });
+  //     toast({
+  //       title: "Property Listed",
+  //       description: "Your property is now live on LandLedger.",
+  //     });
   
-      // Reset form after success
-      setFormData({
-        title: "",
-        description: "",
-        location: "",
-        price: 0,
-        squareFootage: 0,
-        bedrooms: 0,
-        bathrooms: 0,
-        yearBuilt: 0,
-        status: "Available",
-      });
-      setFeatures([]);
-      // setImageUrl([]);
+  //     // Reset form after success
+  //     setFormData({
+  //       title: "",
+  //       description: "",
+  //       location: "",
+  //       price: 0,
+  //       squareFootage: 0,
+  //       bedrooms: 0,
+  //       bathrooms: 0,
+  //       yearBuilt: 0,
+  //       status: "Available",
+  //     });
+  //     setFeatures([]);
+  //     // setImageUrl([]);
   
-      // Redirect after short delay
-      setTimeout(() => {
-        navigate("/properties");
-      }, 1500);
+  //     // Redirect after short delay
+  //     setTimeout(() => {
+  //       navigate("/properties");
+  //     }, 1500);
   
-    } catch (error) {
-      toast({
-        title: "Submission Failed",
-        description: "There was an error submitting the property. Please try again.",
-        variant: "destructive",
-      });
-      console.log("❌ Error during handleSubmit:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //   } catch (error) {
+  //     toast({
+  //       title: "Submission Failed",
+  //       description: "There was an error submitting the property. Please try again.",
+  //       variant: "destructive",
+  //     });
+  //     console.log("❌ Error during handleSubmit:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   // const handleSubmit = async (e: React.FormEvent) => {
   //   e.preventDefault();
