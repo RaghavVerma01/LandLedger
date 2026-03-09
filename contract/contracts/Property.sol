@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
@@ -14,7 +13,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Property is
     ERC721URIStorage,
-    ERC721Enumerable,
     Ownable,
     ReentrancyGuard,
     IERC2981
@@ -41,11 +39,11 @@ contract Property is
     struct PropertyDetails {
         string location;
         uint256 price;
+        uint32 sqFootage;
+        uint16 yearBuilt;
+        uint8 bedrooms;
+        uint8 bathrooms;
         PropertyStatus status;
-        uint256 sqFootage;
-        uint256 bedrooms;
-        uint256 bathrooms;
-        uint256 yearBuilt;
     }
 
     // Royalty info
@@ -95,7 +93,6 @@ contract Property is
      * @dev Creates a new property token with comprehensive validation
      */
     function createProperty(
-        address to,
         string memory tokenURI,
         string memory location,
         uint256 price,
@@ -103,7 +100,7 @@ contract Property is
         uint256 bedrooms,
         uint256 bathrooms,
         uint256 yearBuilt
-    ) external nonReentrant returns (uint256) {
+    ) external returns (uint256) {
         if (bytes(tokenURI).length == 0 || bytes(location).length == 0)
             revert InvalidInput();
         if (
@@ -125,10 +122,10 @@ contract Property is
             location: location,
             price: price,
             status: PropertyStatus.Available,
-            sqFootage: sqFootage,
-            bedrooms: bedrooms,
-            bathrooms: bathrooms,
-            yearBuilt: yearBuilt
+            sqFootage: uint32(sqFootage),
+            bedrooms: uint8(bedrooms),
+            bathrooms: uint8(bathrooms),
+            yearBuilt: uint16(yearBuilt)
         });
 
         emit PropertyListed(newTokenId, msg.sender, price);
@@ -161,13 +158,8 @@ contract Property is
         uint256 tokenId,
         PropertyStatus status
     ) external {
-        try this.ownerOf(tokenId) {
-            // Token exists, continue with function
-        } catch {
-            revert InvalidInput();
-        }
-
-        if (ownerOf(tokenId) != msg.sender && owner() != msg.sender)
+        address currentOwner = ownerOf(tokenId);
+        if (currentOwner != msg.sender && owner() != msg.sender)
             revert NotOwner();
 
         _propertyDetails[tokenId].status = status;
@@ -178,13 +170,8 @@ contract Property is
      * @dev Updates the property price
      */
     function updatePropertyPrice(uint256 tokenId, uint256 newPrice) external {
-        try this.ownerOf(tokenId) {
-            // Token exists, continue with function
-        } catch {
-            revert InvalidInput();
-        }
-
-        if (ownerOf(tokenId) != msg.sender) revert NotOwner();
+        address currentOwner = ownerOf(tokenId);
+        if (currentOwner != msg.sender) revert NotOwner();
         if (newPrice == 0) revert InvalidInput();
 
         uint256 oldPrice = _propertyDetails[tokenId].price;
@@ -217,38 +204,13 @@ contract Property is
     /**
      * @dev Returns the current owner of a property
      */
-    function getPropertyOwner(uint256 tokenId) external view returns (address) {
-        return ownerOf(tokenId);
-    }
-
-    // Required overrides due to multiple inheritance
-    function tokenURI(
-        uint256 tokenId
-    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
-        return ERC721URIStorage.tokenURI(tokenId);
-    }
-
-    function _update(
-        address to,
-        uint256 tokenId,
-        address auth
-    ) internal override(ERC721, ERC721Enumerable) returns (address) {
-        return super._update(to, tokenId, auth);
-    }
-
-    function _increaseBalance(
-        address account,
-        uint128 amount
-    ) internal override(ERC721, ERC721Enumerable) {
-        super._increaseBalance(account, amount);
-    }
 
     function supportsInterface(
         bytes4 interfaceId
     )
         public
         view
-        override(ERC721Enumerable, ERC721URIStorage, IERC165)
+        override(ERC721URIStorage, IERC165)
         returns (bool)
     {
         return

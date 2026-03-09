@@ -27,6 +27,7 @@ contract Escrow is Ownable, ReentrancyGuard {
     error NFTTransferFailed();
     error InvalidEscrowState();
     error EscrowAlreadyExists();
+    error EscrowNotExpired();
 
     // Escrow Statuses
 
@@ -37,27 +38,27 @@ contract Escrow is Ownable, ReentrancyGuard {
         Cancelled,
         Disputed
     }
-
     // Structure to store escrow details
     struct EscrowDetails {
-        address propertyContract;
         uint256 tokenId;
+        uint256 amount;
+        address propertyContract;
         address buyer;
         address seller;
-        uint256 amount;
-        uint256 createdAt;
-        uint256 expiresAt;
+        uint64 createdAt;
+        uint64 expiresAt;
         EscrowStatus status;
         bool inspectionPassed;
         bool buyerApproved;
         bool sellerApproved;
+        bool isFunded;
     }
-
+    
     //Mapping escrowId to escrow details
     mapping(bytes32 => EscrowDetails) public escrows;
 
     // Mapping to track deposits
-    mapping(bytes32 => uint256) public escrowDeposits;
+    // mapping(bytes32 => uint256) public escrowDeposits;
     //Escrow fee percentage (in basis points, 100 = 1%)
     uint256 public escrowFeeRate;
 
@@ -141,7 +142,7 @@ contract Escrow is Ownable, ReentrancyGuard {
         uint256 _tokenId,
         address _seller,
         uint256 _price
-    ) external nonReentrant returns (bytes32) {
+    ) external returns (bytes32) {
         if (_propertyContract == address(0) || _seller == address(0))
             revert InvalidAddress();
         if (_price == 0) revert InvalidAmount();
@@ -172,12 +173,13 @@ contract Escrow is Ownable, ReentrancyGuard {
             buyer: msg.sender,
             seller: _seller,
             amount: _price,
-            createdAt: block.timestamp,
-            expiresAt: block.timestamp + escrowTimeLimit,
+            createdAt: uint64 (block.timestamp),
+            expiresAt: uint64 (block.timestamp + escrowTimeLimit),
             status: EscrowStatus.Active,
             inspectionPassed: false,
             buyerApproved: false,
-            sellerApproved: false
+            sellerApproved: false,
+            isFunded: false
         });
 
         emit EscrowCreated(
@@ -204,10 +206,8 @@ contract Escrow is Ownable, ReentrancyGuard {
         if (escrow.status != EscrowStatus.Active) revert EscrowNotActive();
         if (msg.sender != escrow.buyer) revert NotAuthorized();
         if (msg.value != escrow.amount) revert InvalidAmount();
-        if (escrowDeposits[_escrowId] > 0) revert InvalidEscrowState(); // Prevent double deposit
-
-        escrowDeposits[_escrowId] = msg.value;
-
+        if (escrow.isFunded) revert InvalidEscrowState(); // Prevent double deposit
+        escrow.isFunded = true;
         emit FundsDeposited(_escrowId, msg.sender, msg.value);
     }
 
@@ -274,27 +274,15 @@ contract Escrow is Ownable, ReentrancyGuard {
 
     function _completeEscrow(bytes32 _escrowId) internal {
         EscrowDetails storage escrow = escrows[_escrowId];
-
-        //Verify conditions
-        if (escrow.status != EscrowStatus.Active) revert EscrowNotActive();
-        if (
-            !escrow.buyerApproved ||
-            !escrow.sellerApproved ||
-            !escrow.inspectionPassed
-        ) revert InvalidEscrowState();
-
         //Check if contract has enough funds
-
-        // uint256 contractBalance = address(this).balance;
-        uint256 depositedAmount = escrowDeposits[_escrowId];
-        if (depositedAmount < escrow.amount) revert InsufficientFunds();
+        if(!escrow.isFunded) revert InsufficientFunds();
 
         //Calculate fees
         uint256 fee = (escrow.amount * escrowFeeRate) / 10000;
         uint256 sellerAmount = escrow.amount - fee;
 
         // Reset deposit to avoid reentrancy risk
-        escrowDeposits[_escrowId] = 0;
+        escrow.isFunded = false;
         //Update escrow status
         escrow.status = EscrowStatus.Completed;
 
@@ -342,7 +330,7 @@ contract Escrow is Ownable, ReentrancyGuard {
     function cancelEscrow(
         bytes32 _escrowId,
         string memory _reason
-    ) external nonReentrant {
+    ) external {
         EscrowDetails storage escrow = escrows[_escrowId];
 
         if (escrow.status != EscrowStatus.Active) revert EscrowNotActive();
@@ -352,17 +340,18 @@ contract Escrow is Ownable, ReentrancyGuard {
             msg.sender != owner()
         ) revert NotAuthorized();
 
+        if(block.timestamp<escrow.expiresAt && msg.sender!=owner()){
+            revert EscrowNotExpired();
+        }
+
         escrow.status = EscrowStatus.Cancelled;
 
         //Refund any deposited funds to the buyer
-        // uint256 contractBalance = address(this).balance;
-        uint256 refundAmount = escrowDeposits[_escrowId];
-        escrowDeposits[_escrowId] = 0;
-        if (refundAmount > 0) {
-            (bool success, ) = payable(escrow.buyer).call{value: refundAmount}(
-                ""
-            );
-            if (!success) revert TransferFailed();
+        if(escrow.isFunded){
+            uint256 refundAmount = escrow.amount;
+            escrow.isFunded = false;
+            (bool success,) = payable(escrow.buyer).call{value:refundAmount}("");
+            if(!success) revert TransferFailed();
         }
 
         emit EscrowCancelled(_escrowId, _reason);
@@ -400,32 +389,28 @@ contract Escrow is Ownable, ReentrancyGuard {
         EscrowStatus _resolution
     ) external onlyOwner nonReentrant {
         EscrowDetails storage escrow = escrows[_escrowId];
-
         if (escrow.status != EscrowStatus.Disputed) revert InvalidEscrowState();
         if (
             _resolution != EscrowStatus.Completed &&
             _resolution != EscrowStatus.Cancelled
         ) revert InvalidEscrowState();
+
         if (_resolution == EscrowStatus.Completed) {
             _completeEscrow(_escrowId);
         } else {
             escrow.status = EscrowStatus.Cancelled;
-
-            //Refund deposited funds to buyer
-            // uint256 contractBalance = address(this).balance;
-            uint256 refundAmount = escrowDeposits[_escrowId];
-            escrowDeposits[_escrowId] = 0;
-            if (refundAmount > 0) {
-                (bool success, ) = payable(escrow.buyer).call{
-                    value: refundAmount
-                }("");
+            
+            if (escrow.isFunded) {
+                uint256 refundAmount = escrow.amount;
+                escrow.isFunded = false; 
+                
+                (bool success, ) = payable(escrow.buyer).call{value: refundAmount}("");
                 if (!success) revert TransferFailed();
             }
         }
 
         emit EscrowResolved(_escrowId, _resolution);
     }
-
     /**
      * @dev Update the escrow fee rate (only owner)
      * @param _newFeeRate New fee rate in basis points (100 = 1%)
@@ -474,15 +459,4 @@ contract Escrow is Ownable, ReentrancyGuard {
     function getContractBalance() external view onlyOwner returns (uint256) {
         return address(this).balance;
     }
-
-    /**
-     * @dev Function to receive  ether when msg.data is empty
-     */
-
-    receive() external payable {}
-
-    /**
-     * @dev Fallback function
-     */
-    fallback() external payable {}
 }
