@@ -1,145 +1,80 @@
-// import React, { useState } from "react";
-// import { getContracts } from "@/utils/contracts";
-// import { ethers, Transaction } from "ethers";
+import React,{useState} from "react";
+import {Button} from '@/components/ui/button';
+import { createEscrow } from "@/utils/escrowUtils";
+import { useToast } from "@/hooks/use-toast";
+import { ethers } from "ethers";
 
-// type Props={
-//     tokenId : string;
-//     price:number; //in ETH
-//     seller: string;
-// };
-
-// const BuyButton: React.FC<Props> = ({tokenId,price,seller})=>{
-//     const[status,setStatus] = useState('');
-//     const[loading,setLoading] = useState(false);
-
-//     const handleBuy = async()=>{
-//         setLoading(true);
-//         try{
-//             setStatus("Connecting to contracts...");
-//             const {
-//                 propertyAddress,
-//                 escrowContract,
-//                 signer
-//             } = await getContracts();
-
-//             const priceInWei = ethers.parseEther(price.toString());
-//             setStatus("Creating Escrow");
-
-//             const createTx = await escrowContract.createEscrow(
-//                 propertyAddress,
-//                 tokenId,
-//                 seller,
-//                 priceInWei
-//             );
-
-//             const receipt = await createTx.wait();
-
-//             // Get EscrowCreated event and extract the escrowId
-
-//             const escrowEvent=receipt.logs.map(log=>{
-//                 try{
-//                     return escrowContract.interface.parseLog(log);
-//                 }catch(e){
-//                     return null;
-//                 }
-//             })
-//             .find(event => event && event.name === "EscrowCreated");
-
-//             if(!escrowEvent) throw new Error("EscrowCreated event not found");
-
-//             const escrowId = escrowEvent.args.escrowId;
-
-//             setStatus("Depositing funds...");
-
-//             const depositTx = await escrowContract.depositFunds(escrowId,{
-//                 value:priceInWei,
-//             });
-
-//             await depositTx.wait();
-//             setStatus("Funds Deposited. Awaiting inspection and approval");
-//         }catch(err:any){
-//             console.error(err);
-//             setStatus("Transaction Failed: "+ (err?.reason||err?.message));
-//         }finally{
-//             setLoading(false);
-//         }
-//     };
-
-//     return (
-//     <div className="p-4 border rounded shadow">
-//       <button
-//         onClick={handleBuy}
-//         disabled={loading}
-//         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-//       >
-//         {loading ? 'Processing...' : 'Purchase Property'}
-//       </button>
-//       {status && <p className="mt-2 text-sm text-gray-700">{status}</p>}
-//     </div>
-//   );
-// };
-
-// export default BuyButton;
-
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-    createEscrow,
-    depositFunds,
-    approveEscrow,
-    getEscrowDetails
-} from "@/utils/escrowUtils";
-
-interface BuyButtonProps {
-    tokenId: string;
-    price: number;
-    seller: string;
-    propertyContract: string
+interface BuyButtonProps{
+    propertyId:string; //Mongo ID
+    tokenId:string; //Blockchain ID
+    price:number;
+    seller:string;
+    propertyContract:string;
+    onSuccess:()=>void; //Callback to update UI on PropertyDetails page
 }
 
-const BuyButton: React.FC<BuyButtonProps> = ({ tokenId, price, seller, propertyContract }) => {
-    const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState<string>("");
-    const [escrowId, setEscrowId] = useState<string | null>(null);
+const BuyButton:React.FC<BuyButtonProps>=({
+    propertyId,
+    tokenId,
+    price,
+    seller,
+    propertyContract,
+    onSuccess
+})=>{
+    const [loading,setLoading] = useState(false);
+    const [status,setStatus] = useState<string>("")
+    const {toast} = useToast();
 
-    const handleBuy = async () => {
-        try {
+    const handleBuy = async()=>{
+        try{
             setLoading(true);
-            setStatus("Creating Escrow...");
+            setStatus("Please confirm the transaction in Metamask...");
 
-            // 1. Create Escrow
-            const newEscrowId = await createEscrow(propertyContract, tokenId, seller, price);
-            setEscrowId(newEscrowId.toString());
-            setStatus(`Escrow created (ID: ${newEscrowId})`);
+            //1. Initiate Escrow on Blockchain
+            const newEscrowId = await createEscrow(propertyContract,tokenId,seller,price);
+            setStatus(`Escrow created (ID:${newEscrowId}). Locking property in Database...`);
 
-            // 2. Deposit Funds
-            setStatus("Depositing Funds into escrow...");
-            await depositFunds(newEscrowId, price);
-            setStatus("Funds Deposited Successfully");
+            //2. Get the buyer's wallet address
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const buyerWallet = await signer.getAddress();
 
-            // 3. Buyer approval
-            setStatus("Buyer Approval Pending...");
-            await approveEscrow(newEscrowId);
-            setStatus("Buyer approval complete.");
+            //3. Sync with DB
+            const response = await fetch(`http://localhost:5000/api/property/update-escrow/${propertyId}`,{
+                method:'PATCH',
+                headers:{
+                    'Content-Type':'application/json',
+                    'auth-token':localStorage.getItem('token')||''
+                },
+                body:JSON.stringify({
+                    escrowId:newEscrowId.toString(),
+                    buyerWallet:buyerWallet
+                })
+            });
 
-            // 4. Seller approval
-            setStatus("Waiting for Seller approval...");
-            const interval = setInterval(async () => {
-                const details = await getEscrowDetails(newEscrowId);
-                if (details.completed) {
-                    clearInterval(interval);
-                    setStatus("Purchase Complete! Property Transferred.");
-                }
-            }, 5000)
-        }
-        catch (err: any) {
-            console.error("Buy Error: ", err);
-            setStatus(`Error: ${err.message}`)
-        }
-        finally {
+            if(!response.ok){
+                throw new Error("Failed to update database, but blockchain transaction succeeded.");
+            }
+
+            toast({
+                title:"Offer Submitted!",
+                description:"The property is now locked in escrow. Waiting for Seller Approval."
+            })
+
+            //4. Updating the parent UI (Property Details Page)
+            onSuccess();
+        }catch(err:any){
+            console.error("Buy error: ",err);
+            toast({
+                title:"Transaction Failed",
+                description:err.message||"An error occurred",
+                variant:'destructive'
+            })
+            setStatus(""); //Clear Status on error
+        }finally{
             setLoading(false);
         }
-    };
+    }
 
     return (
         <div>
@@ -151,7 +86,7 @@ const BuyButton: React.FC<BuyButtonProps> = ({ tokenId, price, seller, propertyC
                 {loading ? "Processing..." : "Buy Property"}
             </Button>
             {status && (
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-gray-600 font-medium text-center">
                     {status}
                 </p>
             )}

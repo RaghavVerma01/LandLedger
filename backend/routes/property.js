@@ -208,5 +208,58 @@ router.post(
     }
   });
   
+  router.patch('/update-escrow/:id',fetchuser,async(req,res)=>{
+    try{
+      const propertyId = req.params.id;
+      const {escrowId,buyerWallet} = req.body;
+
+      let property = await Property.findById(propertyId);
+      if(!property){
+        return res.status(404).json({message:"Property Not Found"});
+      }
+      if(property.status!=="Available"){
+        return res.status(400).json({message:"Property is no longer available"});
+      }
+
+      property.status = "Under Contract";
+      property.escrowId = escrowId.toString();
+      property.buyerWallet = buyerWallet.toLowerCase();
+
+      await property.save();
+      res.json({
+        message:"Property securely locked in escrow",
+        property
+      })
+    }catch(error){
+      console.error("Error updating escrow status: ",error);
+      res.status(500).json({message:"Server error"});
+    }
+  })
+
+  router.patch('/complete-escrow/:id',fetchuser,async(req,res)=>{
+    try{
+      const propertyId = req.params.id;
+  
+      let property = await Property.findById(propertyId);
+      if(!property){
+        return res.status(404).json({message:"Property Not found"});
+      }
+      if(property.status!=="Under Contract"){
+        return res.status(400).json({message: "Property must be under contract to finalize sale"});
+      }
+  
+      property.status = "Sold";
+  
+      await property.save();
+  
+      res.json({
+        message:"Transaction Complete! Property marked as Sold.",
+        property
+      })
+    }catch(error){
+      console.error("Error finalizing sale in DB: ",error);
+      res.status(500).json({message:"Server Error"});
+    }
+  })
    
 module.exports = router;

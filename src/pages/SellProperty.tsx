@@ -133,7 +133,6 @@ const SellProperty = () => {
     const tokenURI = `https://landledger-metadata.com/dummy/${Date.now()}`;
 
     const tx = await propertyContract.createProperty(
-      signerAddress,
       tokenURI,
       formData.location,
       ethers.parseEther(formData.price.toString()),

@@ -21,6 +21,8 @@ export interface Property {
   features?: string[];
   imageUrls: string[];
   seller: Seller|null;
+  escrowId:string|null;
+  buyerWallet:string|null;
 }
 
 interface PropertyContextType {

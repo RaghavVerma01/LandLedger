@@ -15,7 +15,7 @@ import PaymentEscrow from "./pages/PaymentEscrow";
 import Profile from "./pages/Profile";
 import Aiprediction from "./pages/Aiprediction";
 import React from "react";
-import SellerDashboard from "./pages/SellerDashboard";
+import SellerDashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 

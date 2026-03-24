@@ -76,7 +76,7 @@ const PropertyDetail = () => {
   };
 
   const handleBuy = async () => {
-  
+
   }
   const handlePurchase = () => {
     // In a real app, this would initiate the blockchain transaction
@@ -154,30 +154,30 @@ const PropertyDetail = () => {
 
             {/* Property Images Carousel */}
             <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-8">
-                {property.imageUrls.length >0 ? (
-                  <Carousel className="w-full">
-                    <CarouselContent>
-                      {property?.imageUrls.map((  image, index) => (
-                        <CarouselItem key={index}>
-                          <div className="h-[300px] md:h-[500px] w-full">
-                            <img
-                              src={image || "/placeholder-property.jpg"}
-                              alt={`${property.title} - Image ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="left-4" />
-                    <CarouselNext className="right-4" />
-                  </Carousel>
-                ) : (
-                  <div className="h-[300px] md:h-[500px] w-full flex items-center justify-center bg-gray-200">
-                    <p className="text-gray-500">No images available</p>
-                  </div>
-                )}
-              </div>
+              {property.imageUrls.length > 0 ? (
+                <Carousel className="w-full">
+                  <CarouselContent>
+                    {property?.imageUrls.map((image, index) => (
+                      <CarouselItem key={index}>
+                        <div className="h-[300px] md:h-[500px] w-full">
+                          <img
+                            src={image || "/placeholder-property.jpg"}
+                            alt={`${property.title} - Image ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="left-4" />
+                  <CarouselNext className="right-4" />
+                </Carousel>
+              ) : (
+                <div className="h-[300px] md:h-[500px] w-full flex items-center justify-center bg-gray-200">
+                  <p className="text-gray-500">No images available</p>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -247,7 +247,16 @@ const PropertyDetail = () => {
                             className="w-full mt-2 bg-estate-secondary hover:bg-estate-secondary/80"
                             onClick={handlePurchase}
                           > */}
-                          <BuyButton tokenId={property.blockchainId} price={property.price} seller={property.seller.walletAddress} propertyContract={propertyAddress}/>
+                          <BuyButton 
+                          propertyId={property._id} 
+                          tokenId={property.blockchainId} 
+                          price={property.price} 
+                          seller={property.seller.walletAddress} 
+                          propertyContract={propertyAddress} 
+                          onSuccess={()=>{
+                            setProperty(prev=>prev?{...prev,status:"Under Contract"}:null);
+                          }}
+                          />
                           {/* </BuyButton> */}
                         </div>
                       </div>
@@ -279,19 +288,19 @@ const PropertyDetail = () => {
                     {property?.seller ? (
                       <>
                         <div>
-                        <h4 className="font-semibold">{property.seller.name}</h4>
-                        <p className="text-sm text-gray-500">Property Seller</p>
-                      </div>
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center text-gray-700">
-                          <Mail size={16} className="mr-2 text-gray-500" />
-                          <span>{property.seller.username}</span>
+                          <h4 className="font-semibold">{property.seller.name}</h4>
+                          <p className="text-sm text-gray-500">Property Seller</p>
                         </div>
-                        <div className="flex items-center text-gray-700">
-                          <Phone size={16} className="mr-2 text-gray-500" />
-                          <span>{property.seller.phone}</span>
+                        <div className="space-y-3 mb-6">
+                          <div className="flex items-center text-gray-700">
+                            <Mail size={16} className="mr-2 text-gray-500" />
+                            <span>{property.seller.username}</span>
+                          </div>
+                          <div className="flex items-center text-gray-700">
+                            <Phone size={16} className="mr-2 text-gray-500" />
+                            <span>{property.seller.phone}</span>
+                          </div>
                         </div>
-                      </div>
                       </>
                     ) : (
                       <div>
@@ -333,4 +342,5 @@ const PropertyDetail = () => {
   );
 };
 
+// pranati bohot achi hai, hitler hai, par achi hai.
 export default PropertyDetail;

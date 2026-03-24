@@ -28,6 +28,15 @@ const propertySchema = new mongoose.Schema({
     },
     features:[String],
     imageUrls:[String],
+    escrowId:{
+        type:String,
+        default:null
+    },
+    buyerWallet:{
+        type:String,
+        lowercase:true,
+        default:null
+    }
 },{timestamps:true});
 
 module.exports = mongoose.model("Property",propertySchema);
